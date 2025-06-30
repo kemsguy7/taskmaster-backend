@@ -1,0 +1,565 @@
+openapi: 3.0.0
+info:
+  title: TaskMaster Pro API
+  description: A comprehensive Todo Management API with advanced features including priority levels, categories, due dates, search & filter capabilities, and statistics
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@taskmasterpro.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://todobackend.buyinbytes.com
+    description: Production Server
+  - url: http://localhost:5000
+    description: Development Server
+
+tags:
+  - name: Health
+    description: API health and status endpoints
+  - name: Todos
+    description: Todo management operations
+  - name: Statistics
+    description: Todo statistics and analytics
+
+components:
+  schemas:
+    Todo:
+      type: object
+      required:
+        - title
+      properties:
+        _id:
+          type: string
+          description: Auto-generated MongoDB ObjectId
+          example: "64f8b5c2d4e1a2b3c4d5e6f7"
+        title:
+          type: string
+          description: Todo title
+          example: "Complete project documentation"
+          maxLength: 100
+        description:
+          type: string
+          description: Todo description
+          example: "Write comprehensive API documentation and user guide"
+          maxLength: 500
+        completed:
+          type: boolean
+          description: Completion status
+          example: false
+          default: false
+        priority:
+          type: string
+          enum: [low, medium, high]
+          description: Todo priority level
+          example: "high"
+          default: "medium"
+        category:
+          type: string
+          description: Todo category
+          example: "work"
+          default: "general"
+        dueDate:
+          type: string
+          format: date-time
+          description: Due date for the todo
+          example: "2025-07-05T10:00:00Z"
+        createdAt:
+          type: string
+          format: date-time
+          description: Creation timestamp
+          example: "2025-06-30T10:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+          example: "2025-06-30T14:30:00Z"
+
+    CreateTodoRequest:
+      type: object
+      required:
+        - title
+      properties:
+        title:
+          type: string
+          description: Todo title
+          example: "Complete project documentation"
+          maxLength: 100
+        description:
+          type: string
+          description: Todo description
+          example: "Write comprehensive API documentation"
+          maxLength: 500
+        priority:
+          type: string
+          enum: [low, medium, high]
+          description: Priority level
+          example: "high"
+          default: "medium"
+        category:
+          type: string
+          description: Todo category
+          example: "work"
+          default: "general"
+        dueDate:
+          type: string
+          format: date
+          description: Due date (YYYY-MM-DD)
+          example: "2025-07-05"
+
+    UpdateTodoRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Todo title
+          example: "Updated task title"
+        description:
+          type: string
+          description: Todo description
+          example: "Updated description"
+        completed:
+          type: boolean
+          description: Completion status
+          example: true
+        priority:
+          type: string
+          enum: [low, medium, high]
+          description: Priority level
+          example: "medium"
+        category:
+          type: string
+          description: Todo category
+          example: "personal"
+        dueDate:
+          type: string
+          format: date
+          description: Due date (YYYY-MM-DD)
+          example: "2025-07-10"
+
+    TodoStats:
+      type: object
+      properties:
+        total:
+          type: integer
+          description: Total number of todos
+          example: 25
+        completed:
+          type: integer
+          description: Number of completed todos
+          example: 12
+        pending:
+          type: integer
+          description: Number of pending todos
+          example: 13
+        byPriority:
+          type: array
+          items:
+            type: object
+            properties:
+              _id:
+                type: string
+                example: "high"
+              count:
+                type: integer
+                example: 8
+          description: Todo count by priority
+        byCategory:
+          type: array
+          items:
+            type: object
+            properties:
+              _id:
+                type: string
+                example: "work"
+              count:
+                type: integer
+                example: 15
+          description: Todo count by category
+
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "healthy"
+        uptime:
+          type: number
+          example: 3600.5
+        timestamp:
+          type: string
+          format: date-time
+          example: "2025-06-30T10:00:00Z"
+        database:
+          type: string
+          example: "connected"
+        memory:
+          type: object
+          properties:
+            used:
+              type: string
+              example: "45.2 MB"
+            total:
+              type: string
+              example: "128.0 MB"
+        environment:
+          type: string
+          example: "development"
+
+    ApiInfo:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "TaskMaster Pro API Server"
+        version:
+          type: string
+          example: "1.0.0"
+        status:
+          type: string
+          example: "healthy"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2025-06-30T10:00:00Z"
+        endpoints:
+          type: object
+          properties:
+            todos:
+              type: string
+              example: "/api/todos"
+            stats:
+              type: string
+              example: "/api/todos/api/stats"
+            documentation:
+              type: string
+              example: "/api-docs"
+            health:
+              type: string
+              example: "/health"
+        features:
+          type: array
+          items:
+            type: string
+          example: ["CRUD Operations", "Priority Levels", "Categories", "Due Dates", "Search & Filter"]
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: "Todo not found"
+
+    ValidationError:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Validation error message
+          example: "Title is required"
+
+    SuccessMessage:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Success message
+          example: "Todo deleted successfully"
+
+paths:
+  /:
+    get:
+      summary: API Health Check and Information
+      description: Get basic API information, status, and available endpoints
+      tags:
+        - Health
+      responses:
+        '200':
+          description: API information retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiInfo'
+
+  /health:
+    get:
+      summary: Detailed Health Check
+      description: Get detailed health status including database connection, memory usage, and uptime
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Detailed health status retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+
+  /api/todos:
+    get:
+      summary: Get all todos with optional filters
+      description: Retrieve all todos with optional filtering by completion status, priority, category, and search terms
+      tags:
+        - Todos
+      parameters:
+        - name: completed
+          in: query
+          description: Filter by completion status
+          required: false
+          schema:
+            type: boolean
+          example: false
+        - name: priority
+          in: query
+          description: Filter by priority level
+          required: false
+          schema:
+            type: string
+            enum: [low, medium, high]
+          example: "high"
+        - name: category
+          in: query
+          description: Filter by category
+          required: false
+          schema:
+            type: string
+          example: "work"
+        - name: search
+          in: query
+          description: Search in title and description
+          required: false
+          schema:
+            type: string
+          example: "project"
+      responses:
+        '200':
+          description: Todos retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Todo'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      summary: Create a new todo
+      description: Create a new todo item with title, description, priority, category, and due date
+      tags:
+        - Todos
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTodoRequest'
+            examples:
+              basic:
+                summary: Basic todo
+                value:
+                  title: "Complete project documentation"
+                  description: "Write comprehensive API documentation"
+                  priority: "high"
+                  category: "work"
+              withDueDate:
+                summary: Todo with due date
+                value:
+                  title: "Review pull requests"
+                  description: "Check and approve pending code reviews"
+                  priority: "medium"
+                  category: "work"
+                  dueDate: "2025-07-05"
+      responses:
+        '201':
+          description: Todo created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/todos/{id}:
+    get:
+      summary: Get a specific todo by ID
+      description: Retrieve a single todo item by its unique identifier
+      tags:
+        - Todos
+      parameters:
+        - name: id
+          in: path
+          description: Todo ID
+          required: true
+          schema:
+            type: string
+          example: "64f8b5c2d4e1a2b3c4d5e6f7"
+      responses:
+        '200':
+          description: Todo retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+        '404':
+          description: Todo not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      summary: Update a todo
+      description: Update an existing todo item with new information
+      tags:
+        - Todos
+      parameters:
+        - name: id
+          in: path
+          description: Todo ID
+          required: true
+          schema:
+            type: string
+          example: "64f8b5c2d4e1a2b3c4d5e6f7"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTodoRequest'
+            examples:
+              updateTitle:
+                summary: Update title and description
+                value:
+                  title: "Updated project documentation"
+                  description: "Updated comprehensive API documentation"
+              markCompleted:
+                summary: Mark as completed
+                value:
+                  completed: true
+              changePriority:
+                summary: Change priority
+                value:
+                  priority: "low"
+      responses:
+        '200':
+          description: Todo updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: Todo not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      summary: Delete a todo
+      description: Permanently delete a todo item
+      tags:
+        - Todos
+      parameters:
+        - name: id
+          in: path
+          description: Todo ID
+          required: true
+          schema:
+            type: string
+          example: "64f8b5c2d4e1a2b3c4d5e6f7"
+      responses:
+        '200':
+          description: Todo deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessMessage'
+        '404':
+          description: Todo not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/todos/api/stats:
+    get:
+      summary: Get todo statistics
+      description: Retrieve comprehensive statistics about todos including counts by priority, category, and completion status
+      tags:
+        - Statistics
+      responses:
+        '200':
+          description: Statistics retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TodoStats'
+              examples:
+                sample:
+                  summary: Sample statistics
+                  value:
+                    total: 25
+                    completed: 12
+                    pending: 13
+                    byPriority:
+                      - _id: "high"
+                        count: 8
+                      - _id: "medium"
+                        count: 12
+                      - _id: "low"
+                        count: 5
+                    byCategory:
+                      - _id: "work"
+                        count: 15
+                      - _id: "personal"
+                        count: 7
+                      - _id: "general"
+                        count: 3
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
