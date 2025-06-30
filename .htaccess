@@ -1,0 +1,26 @@
+# DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION BEGIN
+
+PassengerAppRoot "/home/buyiiwvh/strataforge.buyinbytes.com"
+PassengerBaseURI "/"
+PassengerNodejs "/home/buyiiwvh/nodevenv/strataforge.buyinbytes.com/14/bin/node"
+PassengerAppType node
+PassengerStartupFile build/index.js
+
+# DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION END
+
+# DO NOT REMOVE OR MODIFY. CLOUDLINUX ENV VARS CONFIGURATION BEGIN
+
+<IfModule Litespeed>
+SetEnv PORT 8000
+SetEnv NODE_ENV development
+SetEnv MONGODB_URI mongodb+srv://mattidungafa:zwLBWV7NRxwq2W2l@cluster0.grapefc.mongodb.net/vestpad-backend?retryWrites=true&w=majority&appName=Cluster0
+SetEnv JWT_SECRET your_jwt_secret_key_here
+SetEnv JWT_EXPIRATION 24h
+SetEnv WEB3_PROVIDER http://localhost:8545
+SetEnv APP_URL strataforge.buyinbytes.com
+SetEnv EMAIL_SERVICE gmail
+SetEnv EMAIL_USER mattidungafa@gmail.com
+SetEnv EMAIL_PASSWORD wfnn tmxb uiss ditk
+SetEnv EMAIL_FROM no-reply@strataforge.com
+</IfModule>
+# DO NOT REMOVE OR MODIFY. CLOUDLINUX ENV VARS CONFIGURATION END
