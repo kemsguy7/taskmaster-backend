@@ -21,13 +21,13 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/todoap
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:5173', // Vite default port
-  'https://todo-frontend-sigma-one.vercel.app/', // Vercel frontend
+  'https://todo-frontend-sigma-one.vercel.app', // Vercel frontend
   // Add Swagger UI origins
   'https://editor.swagger.io',
   'https://petstore.swagger.io',
   'https://swagger.io',
   // Add your deployed domain for Swagger UI
-  'https://your-backend-domain.onrender.com',
+  'https://taskmaster-backend-wyfc.onrender.com',
   // Allow localhost for development
   'http://localhost:8080',
   'http://127.0.0.1:3000',
