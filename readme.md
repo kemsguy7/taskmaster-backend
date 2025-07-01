@@ -35,7 +35,7 @@ A comprehensive RESTful API for advanced todo management with priority levels, c
 
 ### 1. Clone & Install
 ```bash
-git clone <repository-url>
+git clone http://github.com/kemsguy7/taskmaster-backend
 cd todo-backend
 npm install
 ```
@@ -46,7 +46,7 @@ Create a `.env` file in the root directory:
 PORT=5000
 MONGODB_URI=mongodb://localhost:27017/todoapp (you can use your mongo connection string)
 FRONTEND_URL=http://localhost:5173
-API_URL=http://localhost:5000
+API_URL=http://localhost:5000 or your frontend url if you hosted on a live server 
 NODE_ENV=development
 ```
 
@@ -140,7 +140,7 @@ npm test         # Run tests (when implemented)
 1. Connect your repository
 2. Set environment variables:
    - `MONGODB_URI` (use MongoDB Atlas)
-   - `FRONTEND_URL` (your frontend domain)
+   - `FRONTEND_URL` (your frontend url)
    - `NODE_ENV=production`
 3. Deploy automatically
 

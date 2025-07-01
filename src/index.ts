@@ -6,6 +6,7 @@ import rateLimit from 'express-rate-limit';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
 import path from 'path';
+import fs from 'fs';
 import dotenv from 'dotenv';
 import todoRoutes from './routes/todos';
 import { errorHandler } from './middleware/errorHandler';
@@ -20,21 +21,19 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/todoap
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:5173', // Vite default port
-  'https://your-frontend-domain.com',
-  'https://your-frontend-domain.vercel.app',
+  'https://todo-frontend-sigma-one.vercel.app/', // Vercel frontend
   // Add Swagger UI origins
   'https://editor.swagger.io',
   'https://petstore.swagger.io',
   'https://swagger.io',
-  // frontend vercel domain 
-  'https://todo-frontend-sigma-one.vercel.app',
+  // Add your deployed domain for Swagger UI
+  'https://your-backend-domain.onrender.com',
   // Allow localhost for development
   'http://localhost:8080',
   'http://127.0.0.1:3000',
   'http://127.0.0.1:8080',
   process.env.FRONTEND_URL,
 ].filter(Boolean); // Remove undefined values
-
 
 // Security middleware
 app.use(helmet());
@@ -81,15 +80,36 @@ app.use(express.urlencoded({ extended: true }));
 
 // Setup Swagger Documentation
 try {
-  // Load Swagger document
-  const swaggerPath = path.join(__dirname, 'swagger', 'swagger.yaml');
-  const swaggerDocument = YAML.load(swaggerPath);
+  // Try multiple paths for swagger file (development vs production)
+  const possibleSwaggerPaths = [
+    path.join(__dirname, 'swagger', 'swagger.yaml'),          // Production (dist/swagger/swagger.yaml)
+    path.join(__dirname, '..', 'src', 'swagger', 'swagger.yaml'), // Development fallback
+    path.join(process.cwd(), 'src', 'swagger', 'swagger.yaml'),   // Alternative fallback
+  ];
+
+  let swaggerDocument: any = null;
+  let swaggerPath: string = '';
+
+  // Find the first existing swagger file
+  for (const possiblePath of possibleSwaggerPaths) {
+    if (fs.existsSync(possiblePath)) {
+      swaggerPath = possiblePath;
+      swaggerDocument = YAML.load(possiblePath);
+      break;
+    }
+  }
+
+  if (!swaggerDocument) {
+    throw new Error('Swagger YAML file not found in any expected location');
+  }
+
+  console.log(`✅ Swagger loaded from: ${swaggerPath}`);
 
   // Update the servers based on environment
   swaggerDocument.servers = [
     {
       url: process.env.NODE_ENV === 'production'
-        ? process.env.API_URL || 'https://todobackend.buyinbytes.com'
+        ? process.env.API_URL || 'https://your-production-url.com'
         : `http://localhost:${PORT}`,
       description: process.env.NODE_ENV === 'production' ? 'Production server' : 'Development server',
     },
@@ -112,6 +132,7 @@ try {
   console.log('✅ Swagger documentation loaded successfully');
 } catch (error) {
   console.error('❌ Error setting up Swagger:', error);
+  console.log('⚠️  API will continue without documentation');
 }
 
 // Root endpoint
@@ -153,6 +174,7 @@ app.get('/health', (req, res) => {
       total: `${Math.round(memoryUsage.heapTotal / 1024 / 1024 * 100) / 100} MB`,
     },
     environment: process.env.NODE_ENV || 'development',
+    port: PORT,
   });
 });
 
@@ -183,6 +205,7 @@ mongoose.connect(MONGODB_URI)
       console.log(`🚀 Server running on port ${PORT}`);
       console.log(`📚 API Documentation: http://localhost:${PORT}/api-docs`);
       console.log(`🔍 Health Check: http://localhost:${PORT}/health`);
+      console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
       console.log(`🌐 CORS enabled for origins:`);
       allowedOrigins.forEach(origin => console.log(`   - ${origin}`));
     });
