@@ -3,14 +3,18 @@
   "version": "1.0.0",
   "description": "Todo app backend with Express, TypeScript, and Mongoose",
   "main": "./dist/index.js",
+  "engines": {
+    "node": ">=16.0.0"
+  },
   "scripts": {
-    "build": "tsc",
-    "start": "node dist/index.js",
-    "dev": "nodemon src/index.ts",
-    "render-build": "npm install && npm run build",
-    "postinstall": "npm run build --scripts-prepend-node-path",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint . --ext .ts"
+    "start": "echo 'Starting from:' && pwd && echo 'Looking for:' && ls -la dist/ && node dist/index.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "build": "npm run debug:before && npm run compile && npm run copy:swagger && npm run debug:after",
+    "compile": "npx tsc",
+    "copy:swagger": "mkdir -p dist/swagger && cp -r src/swagger/* dist/swagger/ 2>/dev/null || echo 'No swagger to copy'",
+    "debug:before": "echo '🔍 Before build:' && pwd && ls -la",
+    "debug:after": "echo '🔍 After build:' && ls -la dist/ && echo '📁 Full structure:' && find dist -type f",
+    "test": "jest"
   },
   "dependencies": {
     "express": "^4.18.2",
@@ -30,8 +34,5 @@
     "@types/yamljs": "^0.2.34",
     "typescript": "^5.3.3",
     "ts-node-dev": "^2.0.0"
-  },
-  "engines": {
-    "node": ">=16.0.0"
   }
 }
