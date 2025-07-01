@@ -109,7 +109,7 @@ try {
   swaggerDocument.servers = [
     {
       url: process.env.NODE_ENV === 'production'
-        ? process.env.API_URL || 'https://your-production-url.com'
+        ? process.env.API_URL || 'https://taskmaster-backend-wyfc.onrender.com'
         : `http://localhost:${PORT}`,
       description: process.env.NODE_ENV === 'production' ? 'Production server' : 'Development server',
     },

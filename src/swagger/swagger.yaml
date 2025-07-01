@@ -11,7 +11,7 @@ info:
     url: https://opensource.org/licenses/MIT
 
 servers:
-  - url: https://todobackend.buyinbytes.com
+  - url: https://taskmaster-backend-wyfc.onrender.com
     description: Production Server
   - url: http://localhost:5000
     description: Development Server
